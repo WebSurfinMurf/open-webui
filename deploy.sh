@@ -18,7 +18,7 @@ docker run -d \
   --network traefik-proxy \
   --env-file ~/projects/secrets/open-webui.env \
   -v /opt/open-webui/data:/app/backend/data \
-  -p 8080:8080 \
+  -p 8000:8080 \
   --label "traefik.enable=true" \
   --label "traefik.docker.network=traefik-proxy" \
   --label "traefik.http.routers.open-webui.rule=Host(\`open-webui.ai-servicers.com\`)" \
