@@ -1,0 +1,76 @@
+#!/bin/bash
+set -e
+
+# Colors for output
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+RED='\033[0;31m'
+NC='\033[0m'
+
+echo -e "${GREEN}=== Open-WebUI Keycloak SSO Setup ===${NC}"
+echo ""
+
+# Keycloak configuration
+KEYCLOAK_URL="https://keycloak.ai-servicers.com"
+KEYCLOAK_REALM="master"
+CLIENT_ID="open-webui"
+REDIRECT_URI="https://open-webui.ai-servicers.com/oauth/oidc/callback"
+
+echo -e "${YELLOW}Prerequisites:${NC}"
+echo "1. Keycloak admin access"
+echo "2. Keycloak running at: $KEYCLOAK_URL"
+echo ""
+
+echo -e "${BLUE}Steps to configure in Keycloak Admin Console:${NC}"
+echo ""
+echo "1. Navigate to: $KEYCLOAK_URL/admin"
+echo ""
+echo "2. Create Client:"
+echo "   - Go to: Clients → Create client"
+echo "   - Client ID: ${CLIENT_ID}"
+echo "   - Name: Open WebUI"
+echo "   - Description: AI Chat Interface"
+echo ""
+echo "3. Configure Client:"
+echo "   - Client Protocol: openid-connect"
+echo "   - Access Type: confidential"
+echo "   - Standard Flow: ON"
+echo "   - Direct Access Grants: OFF"
+echo ""
+echo "4. IMPORTANT for Keycloak 26.x+:"
+echo "   - Go to: Clients → open-webui → Settings"
+echo "   - Change 'Client Authentication' from 'None' to 'Client ID and secret'"
+echo "   - Click Save"
+echo ""
+echo "5. Set Redirect URIs:"
+echo "   - Valid Redirect URIs: ${REDIRECT_URI}"
+echo "   - Valid Post Logout Redirect URIs: https://open-webui.ai-servicers.com/*"
+echo "   - Web Origins: https://open-webui.ai-servicers.com"
+echo ""
+echo "6. Get Client Secret:"
+echo "   - Go to: Clients → open-webui → Credentials"
+echo "   - Click 'Regenerate' if needed"
+echo "   - Copy the Client Secret"
+echo ""
+echo -e "${YELLOW}After Keycloak configuration:${NC}"
+echo ""
+echo "1. Update the client secret in /home/administrator/secrets/open-webui.env:"
+echo "   OAUTH_CLIENT_SECRET=<paste_secret_here>"
+echo ""
+echo "2. Restart Open-WebUI:"
+echo "   docker restart open-webui"
+echo ""
+echo "3. Test SSO:"
+echo "   - Visit: https://open-webui.ai-servicers.com"
+echo "   - You should see 'Sign in with Keycloak' button"
+echo ""
+echo -e "${GREEN}Optional: Enable Group Management${NC}"
+echo "Uncomment these lines in open-webui.env:"
+echo "   ENABLE_OAUTH_GROUP_MANAGEMENT=true"
+echo "   ENABLE_OAUTH_GROUP_CREATION=true"
+echo "   OAUTH_GROUPS_CLAIM=groups"
+echo ""
+echo -e "${BLUE}Verification URLs:${NC}"
+echo "OIDC Discovery: $KEYCLOAK_URL/realms/$KEYCLOAK_REALM/.well-known/openid-configuration"
+echo "Token Endpoint: $KEYCLOAK_URL/realms/$KEYCLOAK_REALM/protocol/openid-connect/token"

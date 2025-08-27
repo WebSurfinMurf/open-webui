@@ -2,22 +2,23 @@
 set -euo pipefail
 
 # Load environment
-#source ~/projects/secrets/open-webui.env
+#source /home/administrator/secrets/open-webui.env
 
 # Stop and remove existing container if exists
 docker stop open-webui 2>/dev/null || true
 docker rm open-webui 2>/dev/null || true
 
 # Create data directory
-mkdir -p /opt/open-webui/data
+mkdir -p /home/administrator/data/open-webui
 
 # Deploy Open WebUI
 docker run -d \
   --name open-webui \
   --restart unless-stopped \
   --network traefik-proxy \
-  --env-file ~/projects/secrets/open-webui.env \
-  -v /opt/open-webui/data:/app/backend/data \
+  --add-host keycloak:172.22.0.3 \
+  --env-file /home/administrator/secrets/open-webui.env \
+  -v /home/administrator/data/open-webui:/app/backend/data \
   -p 8000:8080 \
   --label "traefik.enable=true" \
   --label "traefik.docker.network=traefik-proxy" \
