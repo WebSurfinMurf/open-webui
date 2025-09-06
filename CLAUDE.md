@@ -13,7 +13,8 @@ Open WebUI - A user-friendly interface for AI models with Keycloak SSO integrati
 ## Features
 - ✅ **Keycloak SSO Integration**: Full OAuth2/OIDC authentication
 - ✅ **Traefik Reverse Proxy**: HTTPS with Let's Encrypt
-- ✅ **Multi-Model Support**: OpenAI API compatible
+- ✅ **LiteLLM Integration**: Access to 19 LLM models through unified API
+- ✅ **Multi-Provider Support**: OpenAI (GPT-5), Anthropic (Claude Opus 4.1), Google (Gemini 2.5)
 - ✅ **Persistent Storage**: User data and conversations saved
 
 ## Keycloak SSO Configuration
@@ -82,18 +83,46 @@ To verify no errors:
 docker logs open-webui --tail 100 2>&1 | grep -E "ERROR|error|Failed|Exception|timeout"
 ```
 
+## LiteLLM Integration
+
+### Available Models (19 total)
+**OpenAI GPT Models (7)**:
+- gpt-5 (reasoning model, brief responses)
+- gpt-5-chat-latest (shows detailed work)
+- gpt-5-mini, gpt-5-nano
+- gpt-4.1, gpt-4o, gpt-4o-mini
+
+**Anthropic Claude Models (4)**:
+- claude-opus-4.1 (latest, most capable)
+- claude-opus-4
+- claude-thinking (extended reasoning)
+- claude-sonnet-4 (fast, balanced)
+
+**Google Gemini Models (8)**:
+- gemini-2.5-pro, gemini-2.5-flash
+- gemini-2.5-flash-lite, gemini-2.5-flash-image-preview
+- gemini-2.5-flash-preview-tts, gemini-2.5-pro-preview-tts
+- gemini-1.5-pro, gemini-1.5-flash (legacy)
+
+### Model Access
+- **API Gateway**: http://litellm:4000/v1 (internal)
+- **Master Key**: sk-e0b742bc6575adf26c7d356c49c78d8fd08119fcde1d6e188d753999b5f956fc
+- **Default Models**: gpt-5, gpt-5-chat-latest, gpt-5-mini, claude-opus-4.1, gemini-2.5-pro
+
 ## Recent Changes
+
+### 2025-01-11
+- ✅ Integrated LiteLLM with 19 models
+- ✅ Configured GPT-5, Claude Opus 4.1, Gemini 2.5 models
+- ✅ Fixed model routing and identification
+- ✅ Added model verification documentation
 
 ### 2025-08-27
 - ✅ Migrated from `/home/websurfinmurf/projects/` to `/home/administrator/projects/`
 - ✅ Fixed Keycloak OAuth integration with internal networking
 - ✅ Added host entry for Keycloak container
-- ✅ Disabled Ollama backend to eliminate connection errors
 - ✅ Achieved zero errors in logs
 - ✅ Successfully tested SSO login
-
-### 2025-08-17
-- Initial deployment under websurfinmurf
 
 ## Maintenance
 
@@ -121,5 +150,11 @@ docker stop open-webui && docker rm open-webui
 - Internal Docker networking for service communication
 - HTTPS only via Traefik
 
+## Related Documentation
+- LiteLLM Config: `/home/administrator/projects/litellm/CLAUDE.md`
+- Model List: `/home/administrator/projects/litellm/modellist.md`
+- Model Verification: `/home/administrator/projects/litellm/model-verification.md`
+- Integration Guide: `/home/administrator/projects/open-webui/LITELLM_INTEGRATION.md`
+
 ---
-*Last Updated: 2025-08-27*
+*Last Updated: 2025-01-11*
