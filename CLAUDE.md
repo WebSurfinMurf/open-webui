@@ -1,7 +1,10 @@
 # Open WebUI Deployment
 
 ## Overview
-Open WebUI - A user-friendly interface for AI models with Keycloak SSO integration.
+Open WebUI - A user-friendly interface for AI models with Keycloak SSO integration and MCP tool execution support.
+
+**Last Updated**: 2025-09-07
+**Status**: ✅ Running with MCP middleware integration
 
 ## Configuration
 - **Location**: `/home/administrator/projects/open-webui/`
@@ -83,9 +86,42 @@ To verify no errors:
 docker logs open-webui --tail 100 2>&1 | grep -E "ERROR|error|Failed|Exception|timeout"
 ```
 
+## MCP Middleware Integration (2025-09-07) ✅ WORKING
+
+### Current Configuration
+- **API Endpoint**: http://mcp-middleware:4001/v1 (via middleware)
+- **Middleware**: Flask-based execution layer for MCP tools
+- **Network**: Connected to litellm-net for service communication
+- **Status**: ✅ Fully operational with 23 MCP tools
+
+### Internal Access Configuration (2025-09-07)
+- **Container**: open-webui-internal
+- **Port**: 8001
+- **URLs**: 
+  - http://open-webui.linuxserver.lan (via Traefik)
+  - http://linuxserver.lan:8001 (direct)
+- **Authentication**: None (internal network only)
+- **Data Directory**: `/home/administrator/data/open-webui-internal/`
+
+### Dual Instance Setup
+1. **External (SSO)**: https://open-webui.ai-servicers.com
+   - Port 8000, Keycloak authentication required
+   - Production data at `/data/open-webui/`
+   
+2. **Internal (No Auth)**: http://open-webui.linuxserver.lan
+   - Port 8001, no authentication
+   - Separate data at `/data/open-webui-internal/`
+   - Same models and MCP tools
+
+### Available MCP Tools
+- 23 tools across 9 categories
+- Auto-injected into all requests
+- MinIO storage integration for files
+- Mock implementations (real MCP pending)
+
 ## LiteLLM Integration
 
-### Available Models (19 total)
+### Available Models (17 working)
 **OpenAI GPT Models (7)**:
 - gpt-5 (reasoning model, brief responses)
 - gpt-5-chat-latest (shows detailed work)

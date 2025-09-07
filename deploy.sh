@@ -29,6 +29,9 @@ docker run -d \
   --label "traefik.http.services.open-webui.loadbalancer.server.port=8080" \
   ghcr.io/open-webui/open-webui:main
 
+# Connect to litellm-net for middleware access
+docker network connect litellm-net open-webui 2>/dev/null || echo "Note: Could not connect to litellm-net"
+
 echo "Waiting for Open WebUI to start..."
 sleep 10
 
