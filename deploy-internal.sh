@@ -27,8 +27,8 @@ DEFAULT_MODELS=gpt-5-mini,gpt-4o-mini,claude-opus-4.1,gemini-2.5-flash
 # Admin account (auto-created on first run)
 WEBUI_AUTH=false
 
-# OpenAI API settings (point to middleware)
-OPENAI_API_BASE_URL=http://mcp-middleware:4001/v1
+# OpenAI API settings (point directly to LiteLLM - no middleware)
+OPENAI_API_BASE_URL=http://litellm:4000/v1
 OPENAI_API_KEY=sk-e0b742bc6575adf26c7d356c49c78d8fd08119fcde1d6e188d753999b5f956fc
 
 # Disable telemetry
