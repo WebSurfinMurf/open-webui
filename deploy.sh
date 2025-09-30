@@ -15,13 +15,13 @@ mkdir -p /home/administrator/data/open-webui
 docker run -d \
   --name open-webui \
   --restart unless-stopped \
-  --network traefik-proxy \
+  --network traefik-net \
   --add-host keycloak:172.22.0.3 \
   --env-file /home/administrator/secrets/open-webui.env \
   -v /home/administrator/data/open-webui:/app/backend/data \
   -p 8000:8080 \
   --label "traefik.enable=true" \
-  --label "traefik.docker.network=traefik-proxy" \
+  --label "traefik.docker.network=traefik-net" \
   --label "traefik.http.routers.open-webui.rule=Host(\`open-webui.ai-servicers.com\`)" \
   --label "traefik.http.routers.open-webui.entrypoints=websecure" \
   --label "traefik.http.routers.open-webui.tls=true" \

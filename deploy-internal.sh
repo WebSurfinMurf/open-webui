@@ -46,12 +46,12 @@ EOF
 docker run -d \
   --name open-webui-internal \
   --restart unless-stopped \
-  --network traefik-proxy \
+  --network traefik-net \
   --env-file /home/administrator/secrets/open-webui-internal.env \
   -v /home/administrator/data/open-webui-internal:/app/backend/data \
   -p 8001:8080 \
   --label "traefik.enable=true" \
-  --label "traefik.docker.network=traefik-proxy" \
+  --label "traefik.docker.network=traefik-net" \
   --label "traefik.http.routers.open-webui-internal.rule=Host(\`open-webui.linuxserver.lan\`)" \
   --label "traefik.http.routers.open-webui-internal.entrypoints=web" \
   --label "traefik.http.services.open-webui-internal.loadbalancer.server.port=8080" \
