@@ -27,7 +27,7 @@ docker run -d \
   --label "traefik.http.routers.open-webui.tls=true" \
   --label "traefik.http.routers.open-webui.tls.certresolver=letsencrypt" \
   --label "traefik.http.services.open-webui.loadbalancer.server.port=8080" \
-  ghcr.io/open-webui/open-webui:main
+  ghcr.io/open-webui/open-webui:v0.6.32
 
 # Connect to litellm-net for middleware access
 docker network connect litellm-net open-webui 2>/dev/null || echo "Note: Could not connect to litellm-net"
