@@ -3,15 +3,16 @@
 ## Overview
 Open WebUI - A user-friendly interface for AI models with Keycloak SSO integration and MCP tool execution support.
 
-**Last Updated**: 2025-09-07
-**Status**: ✅ Running with MCP middleware integration
+**Last Updated**: 2025-10-10
+**Status**: ✅ Running with MCP middleware integration and Keycloak SSO
 
 ## Configuration
 - **Location**: `/home/administrator/projects/open-webui/`
 - **Data**: `/home/administrator/data/open-webui/`
-- **Secrets**: `/home/administrator/secrets/open-webui.env`
+- **Secrets**: `$HOME/projects/secrets/open-webui.env` (symlink)
 - **Access**: https://open-webui.ai-servicers.com
 - **Local Port**: 8000
+- **Docker Image**: ghcr.io/open-webui/open-webui:main
 
 ## Features
 - ✅ **Keycloak SSO Integration**: Full OAuth2/OIDC authentication
@@ -29,10 +30,12 @@ Successfully integrated with Keycloak at https://keycloak.ai-servicers.com
 - **Access Type**: confidential
 - **Valid Redirect URIs**: `https://open-webui.ai-servicers.com/oauth/oidc/callback`
 
-### Network Configuration
-- Uses internal Docker networking for Keycloak communication
-- Host entry added: `keycloak:172.22.0.3`
-- Internal URL: `http://keycloak:8080/realms/master/`
+### Network Configuration (Updated 2025-10-10)
+- **Primary Network**: keycloak-net (for proper DNS resolution)
+- **Additional Networks**: litellm-net, traefik-net
+- **Keycloak Connection**: Internal Docker DNS (`keycloak:8080`)
+- **DNS Resolution**: Automatic via Docker (no hardcoded IPs)
+- **Internal URL**: `http://keycloak:8080/realms/master/.well-known/openid-configuration`
 
 ## Deployment
 
@@ -43,42 +46,76 @@ cd /home/administrator/projects/open-webui
 ```
 
 ### Manual Configuration
-1. Update Keycloak client secret in `/home/administrator/secrets/open-webui.env`
+1. Update Keycloak client secret in `$HOME/projects/secrets/open-webui.env`
 2. Run `./setup-keycloak.sh` for setup instructions
 3. Deploy with `./deploy.sh`
 
 ## Scripts
-- `deploy.sh` - Main deployment script with Traefik labels and Keycloak host entry
+- `deploy.sh` - Main deployment script with Traefik labels and multi-network setup
 - `setup-keycloak.sh` - Keycloak configuration guide
 
+### Deploy Script Details
+The deploy.sh script is configured to:
+1. Start container on **keycloak-net** first (critical for DNS resolution)
+2. Use env file at `$HOME/projects/secrets/open-webui.env` (portable path)
+3. Connect to litellm-net and traefik-net after initial deployment
+4. No hardcoded host entries (relies on Docker DNS)
+
 ## Environment Variables
-Key settings in `/home/administrator/secrets/open-webui.env`:
+Key settings in `$HOME/projects/secrets/open-webui.env`:
 ```env
 # WebUI Settings
 WEBUI_NAME="AI Servicers Chat"
 WEBUI_URL=https://open-webui.ai-servicers.com
 
+# LiteLLM Integration
+OPENAI_API_KEY=sk-litellm-cecca390f610603ff5180ba0ba2674afc8f7689716daf25343de027d10c32404
+OPENAI_API_BASE_URL=http://mcp-middleware:8080/v1
+
 # Authentication
 ENABLE_SIGNUP=false  # Users must authenticate via Keycloak
 ENABLE_OAUTH_SIGNUP=true  # Auto-create users on first SSO login
 
-# Keycloak OAuth
+# Keycloak OAuth (Internal Docker Network)
+OAUTH_PROVIDER_NAME=Keycloak
 OAUTH_CLIENT_ID=open-webui
 OAUTH_CLIENT_SECRET=pHivWX2Z2GEdHwYnNhLQlqpCMxBf52CA
 OPENID_PROVIDER_URL=http://keycloak:8080/realms/master/.well-known/openid-configuration
+OPENID_REDIRECT_URI=https://open-webui.ai-servicers.com/oauth/oidc/callback
+OAUTH_MERGE_ACCOUNTS_BY_EMAIL=true
+
+# Default Models
+DEFAULT_MODELS=gpt-5,gpt-5-chat-latest,gpt-5-mini,claude-opus-4.1,gemini-2.5-pro
 ```
 
 ## Troubleshooting
 
-### OAuth Internal Server Error
-**Issue**: 500 error when clicking "Sign in with Keycloak"
-**Solution**: 
-- Use internal Docker hostname (`keycloak:8080`) not external URL
-- Add host entry in deploy.sh: `--add-host keycloak:172.22.0.3`
+### OAuth Internal Server Error (FIXED 2025-10-10)
+**Issue**: 500 error or 404 when clicking "Sign in with Keycloak"
+**Root Cause**: Docker DNS resolution issues when container is on multiple networks
+**Solution**:
+1. Start container on `keycloak-net` as primary network (CRITICAL)
+2. Use internal Docker hostname: `http://keycloak:8080`
+3. Do NOT use hardcoded `--add-host` entries
+4. Do NOT use external URLs or IP addresses
+5. Connect to other networks AFTER initial deployment
+
+**Verification**:
+```bash
+# Check DNS resolution
+docker exec open-webui getent hosts keycloak
+
+# Test OIDC endpoint
+docker exec open-webui curl -s -o /dev/null -w "%{http_code}" \
+  http://keycloak:8080/realms/master/.well-known/openid-configuration
+```
 
 ### Connection Timeouts
 **Issue**: `httpx.ConnectTimeout` in logs
-**Solution**: Container must reach Keycloak internally, not through external URL
+**Solution**:
+- Verify container is on keycloak-net
+- Ensure OPENID_PROVIDER_URL uses `http://keycloak:8080` (not external URL)
+- Check deploy.sh has `--network keycloak-net` as first network
 
 ### Clean Logs
 To verify no errors:
@@ -86,13 +123,19 @@ To verify no errors:
 docker logs open-webui --tail 100 2>&1 | grep -E "ERROR|error|Failed|Exception|timeout"
 ```
 
+### DNS Wrong IP Resolution
+**Issue**: `keycloak` hostname resolves to wrong IP (e.g., traefik network IP instead of keycloak-net IP)
+**Cause**: When Docker container is on multiple networks, it uses the first network for DNS
+**Solution**: Always start with keycloak-net as primary network in docker run command
+
 ## MCP Middleware Integration (2025-09-07) ✅ WORKING
 
 ### Current Configuration
-- **API Endpoint**: http://mcp-middleware:4001/v1 (via middleware)
-- **Middleware**: Flask-based execution layer for MCP tools
+- **API Endpoint**: http://mcp-middleware:8080/v1 (via middleware)
+- **Middleware**: FastAPI-based execution layer for MCP tools
 - **Network**: Connected to litellm-net for service communication
-- **Status**: ✅ Fully operational with 23 MCP tools
+- **Status**: ✅ Fully operational with 57 MCP tools across 8 servers
+- **MCP Servers**: filesystem, postgres, puppeteer, memory, minio, n8n, timescaledb, ib
 
 ### Internal Access Configuration (2025-09-07)
 - **Container**: open-webui-internal
@@ -113,11 +156,11 @@ docker logs open-webui --tail 100 2>&1 | grep -E "ERROR|error|Failed|Exception|t
    - Separate data at `/data/open-webui-internal/`
    - Same models and MCP tools
 
-### Available MCP Tools
-- 23 tools across 9 categories
-- Auto-injected into all requests
-- MinIO storage integration for files
-- Mock implementations (real MCP pending)
+### Available MCP Tools (Updated 2025-10-10)
+- **57 tools** across **8 MCP servers**
+- Auto-injected into all requests via middleware
+- Filesystem (9), PostgreSQL (1), Puppeteer (7), Memory (9), MinIO (9), N8N (6), TimescaleDB (6), IB/Interactive Brokers (10)
+- All tools accessible via natural language ("list tools" to see full catalog)
 
 ## LiteLLM Integration
 
@@ -147,6 +190,18 @@ docker logs open-webui --tail 100 2>&1 | grep -E "ERROR|error|Failed|Exception|t
 
 ## Recent Changes
 
+### 2025-10-10 - Keycloak DNS Fix
+- ✅ **Fixed OAuth authentication** - resolved 500/404 errors on login
+- ✅ **Primary network changed** from traefik-net to keycloak-net (critical for DNS)
+- ✅ **Removed hardcoded IPs** - now uses Docker DNS resolution
+- ✅ **Updated env file path** to `$HOME/projects/secrets/open-webui.env` (portable symlink)
+- ✅ **Multi-network setup** - connects to litellm-net and traefik-net after deployment
+- ✅ **Verified working** - Keycloak login flow operational
+- ✅ **Updated to main image** from v0.6.32
+- ✅ **All changes persisted** in deploy.sh for future deployments
+
+**Root Cause**: Docker DNS returns different IPs when container is on multiple networks. Starting on keycloak-net ensures `keycloak` hostname resolves to correct IP (172.19.0.6).
+
 ### 2025-01-11
 - ✅ Integrated LiteLLM with 19 models
 - ✅ Configured GPT-5, Claude Opus 4.1, Gemini 2.5 models
@@ -156,9 +211,7 @@ docker logs open-webui --tail 100 2>&1 | grep -E "ERROR|error|Failed|Exception|t
 ### 2025-08-27
 - ✅ Migrated from `/home/websurfinmurf/projects/` to `/home/administrator/projects/`
 - ✅ Fixed Keycloak OAuth integration with internal networking
-- ✅ Added host entry for Keycloak container
 - ✅ Achieved zero errors in logs
-- ✅ Successfully tested SSO login
 
 ## Maintenance
 
@@ -193,4 +246,4 @@ docker stop open-webui && docker rm open-webui
 - Integration Guide: `/home/administrator/projects/open-webui/LITELLM_INTEGRATION.md`
 
 ---
-*Last Updated: 2025-01-11*
+*Last Updated: 2025-10-10 - Keycloak DNS Fix Applied*

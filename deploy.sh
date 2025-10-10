@@ -15,9 +15,8 @@ mkdir -p /home/administrator/data/open-webui
 docker run -d \
   --name open-webui \
   --restart unless-stopped \
-  --network traefik-net \
-  --add-host keycloak:172.22.0.3 \
-  --env-file /home/administrator/secrets/open-webui.env \
+  --network keycloak-net \
+  --env-file $HOME/projects/secrets/open-webui.env \
   -v /home/administrator/data/open-webui:/app/backend/data \
   -p 8000:8080 \
   --label "traefik.enable=true" \
@@ -27,10 +26,11 @@ docker run -d \
   --label "traefik.http.routers.open-webui.tls=true" \
   --label "traefik.http.routers.open-webui.tls.certresolver=letsencrypt" \
   --label "traefik.http.services.open-webui.loadbalancer.server.port=8080" \
-  ghcr.io/open-webui/open-webui:v0.6.32
+  ghcr.io/open-webui/open-webui:main
 
-# Connect to litellm-net for middleware access
+# Connect to additional networks
 docker network connect litellm-net open-webui 2>/dev/null || echo "Note: Could not connect to litellm-net"
+docker network connect traefik-net open-webui 2>/dev/null || echo "Note: Could not connect to traefik-net"
 
 echo "Waiting for Open WebUI to start..."
 sleep 10
