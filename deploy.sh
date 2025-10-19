@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # Load environment
-#source /home/administrator/secrets/open-webui.env
+#source $HOME/projects/secrets/open-webui.env
 
 # Stop and remove existing container if exists
 docker stop open-webui 2>/dev/null || true

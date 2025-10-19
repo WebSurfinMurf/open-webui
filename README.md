@@ -19,7 +19,7 @@ AI chat interface with Keycloak SSO integration.
 - `.gitignore` - Git ignore rules
 
 ## Configuration
-- Environment: `/home/administrator/secrets/open-webui.env`
+- Environment: `$HOME/projects/secrets/open-webui.env`
 - Data: `/home/administrator/data/open-webui/`
 
 ## Management

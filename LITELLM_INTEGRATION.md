@@ -31,7 +31,7 @@ This document describes how Open-WebUI is connected to LiteLLM to provide access
 ## Configuration Methods
 
 ### Method 1: Environment Variables (Current - Persistent)
-Configuration is set in `/home/administrator/secrets/open-webui.env`:
+Configuration is set in `$HOME/projects/secrets/open-webui.env`:
 
 ```env
 # LiteLLM Gateway Configuration (OpenAI Compatible)
@@ -109,8 +109,8 @@ docker logs open-webui --tail 50
 3. Models automatically available in Open-WebUI
 
 ### Update API Key
-1. Edit `/home/administrator/secrets/litellm.env`
-2. Update `/home/administrator/secrets/open-webui.env`
+1. Edit `$HOME/projects/secrets/litellm.env`
+2. Update `$HOME/projects/secrets/open-webui.env`
 3. Restart both services:
 ```bash
 docker restart litellm

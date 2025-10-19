@@ -11,7 +11,7 @@ docker rm open-webui-internal 2>/dev/null || true
 mkdir -p /home/administrator/data/open-webui-internal
 
 # Create environment file for internal access (no auth)
-cat > /home/administrator/secrets/open-webui-internal.env << 'EOF'
+cat > $HOME/projects/secrets/open-webui-internal.env << 'EOF'
 # WebUI Settings
 WEBUI_NAME="AI Servicers Chat (Internal)"
 WEBUI_URL=http://open-webui.linuxserver.lan:8001
@@ -47,7 +47,7 @@ docker run -d \
   --name open-webui-internal \
   --restart unless-stopped \
   --network traefik-net \
-  --env-file /home/administrator/secrets/open-webui-internal.env \
+  --env-file $HOME/projects/secrets/open-webui-internal.env \
   -v /home/administrator/data/open-webui-internal:/app/backend/data \
   -p 8001:8080 \
   --label "traefik.enable=true" \
