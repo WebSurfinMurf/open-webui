@@ -18,6 +18,7 @@ docker run -d \
   --network keycloak-net \
   --env-file $HOME/projects/secrets/open-webui.env \
   -v /home/administrator/data/open-webui:/app/backend/data \
+  -v /home/administrator/projects/open-webui/docs:/app/docs:ro \
   -p 8000:8080 \
   --label "traefik.enable=true" \
   --label "traefik.docker.network=traefik-net" \
@@ -31,6 +32,7 @@ docker run -d \
 # Connect to additional networks
 docker network connect litellm-net open-webui 2>/dev/null || echo "Note: Could not connect to litellm-net"
 docker network connect traefik-net open-webui 2>/dev/null || echo "Note: Could not connect to traefik-net"
+docker network connect qdrant-net open-webui 2>/dev/null || echo "Note: Could not connect to qdrant-net"
 
 echo "Waiting for Open WebUI to start..."
 sleep 10

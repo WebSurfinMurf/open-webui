@@ -239,11 +239,47 @@ docker stop open-webui && docker rm open-webui
 - Internal Docker networking for service communication
 - HTTPS only via Traefik
 
+## TTS Integration (2026-02-04)
+
+Text-to-speech via `tts-wrapper` - an internal OpenAI-compatible TTS proxy that routes to Cartesia and Deepgram backends.
+
+### Configuration (Admin -> Settings -> Audio -> TTS)
+
+| Setting | Value |
+|---------|-------|
+| TTS Engine | OpenAI |
+| API Base URL | `http://tts-wrapper:8767/v1` |
+| API Key | `not-needed` (any non-empty string; field can't be blank) |
+| TTS Model | `tts-1` |
+| TTS Voice | `cartesia-claude` |
+
+### Available Voices
+
+| Voice | Backend |
+|-------|---------|
+| `cartesia-claude` | Cartesia (default) |
+| `cartesia-chatgpt` | Cartesia |
+| `cartesia-gemini` | Cartesia |
+| `deepgram-asteria` | Deepgram Aura 2 |
+| `deepgram-luna` | Deepgram Aura 2 |
+| + 10 more Deepgram voices | Deepgram Aura 2 |
+
+### How It Works
+
+Open WebUI backend makes server-side POST to `http://tts-wrapper:8767/v1/audio/speech`, receives audio bytes, streams to browser. No browser-to-tts-wrapper traffic. Both services on `keycloak-net` for Docker DNS.
+
+### Related
+- TTS Wrapper: `/home/administrator/projects/tts-wrapper/CLAUDE.md`
+- Same Cartesia voice IDs as livekit-agent
+
+---
+
 ## Related Documentation
 - LiteLLM Config: `/home/administrator/projects/litellm/CLAUDE.md`
 - Model List: `/home/administrator/projects/litellm/modellist.md`
 - Model Verification: `/home/administrator/projects/litellm/model-verification.md`
 - Integration Guide: `/home/administrator/projects/open-webui/LITELLM_INTEGRATION.md`
+- TTS Wrapper: `/home/administrator/projects/tts-wrapper/CLAUDE.md`
 
 ---
-*Last Updated: 2025-10-10 - Keycloak DNS Fix Applied*
+*Last Updated: 2026-02-04 - Added TTS integration via tts-wrapper*

@@ -1,0 +1,43 @@
+version: "3.9"
+
+services:
+  knowledge-sync:
+    build: .
+    container_name: knowledge-sync
+    restart: unless-stopped
+    ports:
+      - "8766:8766"
+    volumes:
+      # Knowledge definition files
+      - /home/administrator/projects/open-webui/docs/knowledge:/knowledge:ro
+      # Cache file (writable)
+      - /home/administrator/projects/open-webui/knowledge-sync:/app/cache
+      # Mount paths that may be referenced in definitions
+      - /home/administrator/projects:/projects:ro
+    environment:
+      - OPEN_WEBUI_URL=http://open-webui:8080
+      - OPEN_WEBUI_API_KEY=${OPEN_WEBUI_API_KEY}
+      - KNOWLEDGE_DIR=/knowledge
+      - CACHE_FILE=/app/cache/.sync_cache.json
+      - QDRANT_URI=http://qdrant:6333
+    networks:
+      - keycloak-net  # Same network as open-webui
+      - traefik-net   # For external access
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.knowledge-sync.rule=Host(`knowledge-sync.ai-servicers.com`)"
+      - "traefik.http.routers.knowledge-sync.entrypoints=websecure"
+      - "traefik.http.routers.knowledge-sync.tls=true"
+      - "traefik.http.routers.knowledge-sync.tls.certresolver=letsencrypt"
+      - "traefik.http.services.knowledge-sync.loadbalancer.server.port=8766"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  keycloak-net:
+    external: true
+  traefik-net:
+    external: true

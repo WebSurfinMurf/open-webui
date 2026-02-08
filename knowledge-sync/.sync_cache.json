@@ -1,0 +1,32 @@
+{
+  "Linux Infrastructure": {
+    "SYSTEM-OVERVIEW.md": {
+      "hash": "1455c598138517e3",
+      "file_id": "4bf25882-62b4-4c0a-99c9-651f5c759698"
+    },
+    "security.md": {
+      "hash": "965c35443437913f",
+      "file_id": "78430364-e443-4e90-bb04-7131b8e86f58"
+    },
+    "network.md": {
+      "hash": "6d7b27d7195a1022",
+      "file_id": "bee62f32-3d9b-4591-ab8a-33b5be917d32"
+    },
+    "logging.md": {
+      "hash": "76011a4d2d8c1467",
+      "file_id": "5c9ff820-79cc-478f-9b3f-77b135d7573d"
+    }
+  },
+  "Claude Customized": {
+    "claudecustomized.md": {
+      "hash": "cf3d4036816e4d28",
+      "file_id": "ea381bda-b214-462e-a272-7d80482b9371"
+    }
+  },
+  "Spec Interviewer": {
+    "specinterviewer.md": {
+      "hash": "8e2577adb4d28cd2",
+      "file_id": "347ad424-aa1a-477d-8d19-bf6ebd5f79ed"
+    }
+  }
+}

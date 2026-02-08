@@ -1,0 +1,27 @@
+version: "3.9"
+
+services:
+  docs-indexer:
+    build: .
+    container_name: open-webui-docs-indexer
+    restart: "no"  # Run once and exit
+    volumes:
+      # Mount the actual ainotes/shared directory (where symlinks point to)
+      - /home/administrator/projects/ainotes/shared:/docs/linuxinfrastructure:ro
+    networks:
+      - qdrant-net
+    environment:
+      - QDRANT_HOST=qdrant
+      - QDRANT_PORT=6333
+    # Remove --watch flag due to inotify limits on host
+    # To re-index manually: docker exec open-webui-docs-indexer python index_docs.py /docs/linuxinfrastructure -c linuxinfrastructure --host qdrant
+    command: ["/docs/linuxinfrastructure", "--collection", "linuxinfrastructure", "--host", "qdrant"]
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  qdrant-net:
+    external: true
