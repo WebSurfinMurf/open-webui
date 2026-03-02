@@ -30,6 +30,7 @@ docker run -d \
   ghcr.io/open-webui/open-webui:main
 
 # Connect to additional networks
+docker network connect postgres-net open-webui 2>/dev/null || echo "Note: Could not connect to postgres-net"
 docker network connect litellm-net open-webui 2>/dev/null || echo "Note: Could not connect to litellm-net"
 docker network connect traefik-net open-webui 2>/dev/null || echo "Note: Could not connect to traefik-net"
 docker network connect qdrant-net open-webui 2>/dev/null || echo "Note: Could not connect to qdrant-net"
